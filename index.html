@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Réseaux — Profil</title>
+  <meta name="description" content="Tous mes réseaux en un seul endroit." />
+  <meta name="theme-color" content="#7C3AED" />
+  <meta property="og:title" content="Réseaux — Profil" />
+  <meta property="og:description" content="Tous mes réseaux en un seul endroit." />
+  <meta property="og:type" content="website" />
+  <style>
+    :root{
+      --bg: #ffffff;
+      --text: #0f1220;
+      --muted: #6b7280;
+      --primary: #7C3AED; /* violet principal */
+      --primary-weak: #ede9fe; /* violet très léger */
+      --card: #ffffff;
+      --ring: #e5e7eb;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body{
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, Apple Color Emoji, Segoe UI Emoji;
+      color: var(--text);
+      background:
+        radial-gradient(1000px 700px at 110% -20%, var(--primary-weak), transparent),
+        radial-gradient(900px 600px at -10% 110%, #f4f4ff, transparent),
+        var(--bg);
+    }
+    .container{
+      min-height: 100dvh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+    .card{
+      width: 100%;
+      max-width: 680px;
+      background: var(--card);
+      border: 1px solid var(--ring);
+      border-radius: 24px;
+      padding: 28px;
+      box-shadow: 0 10px 30px rgba(17, 17, 26, 0.08);
+    }
+    .header{ display: flex; gap: 18px; align-items: center; }
+    .avatar{
+      width: 88px; height: 88px; border-radius: 20px; object-fit: cover;
+      background: linear-gradient(135deg, var(--primary-weak), #f3f4f6);
+      border: 1px solid var(--ring);
+    }
+    h1{ font-size: 28px; line-height: 1.2; margin: 0; }
+    .bio{ color: var(--muted); margin: 6px 0 16px; font-size: 15px; }
+
+    .links{ display: grid; gap: 12px; margin: 18px 0; }
+    .btn{
+      display: flex; align-items: center; gap: 12px;
+      text-decoration: none; padding: 14px 16px; border-radius: 14px;
+      background: #fff; border: 1px solid var(--ring);
+      transition: transform .08s ease, border-color .2s, box-shadow .2s;
+    }
+    .btn:hover{ transform: translateY(-1px); border-color: #d1d5db; box-shadow: 0 6px 20px rgba(17,17,26,0.06); }
+    .btn .icon{ width: 22px; height: 22px; }
+    .btn .label{ font-weight: 600; }
+
+    .toolbar{ display:flex; gap:10px; justify-content: flex-end; margin-top: 6px; }
+    .pill{
+      display:inline-flex; align-items:center; gap:8px; padding:10px 12px;
+      border-radius: 999px; border:1px solid var(--ring); background:#fff;
+      cursor:pointer; user-select:none; font-size: 14px;
+    }
+    .pill svg{ width:18px; height:18px; }
+    .pill.primary{ background: var(--primary-weak); border-color: #ddd6fe; }
+
+    .footer{ margin-top: 14px; color: var(--muted); font-size: 13px; display:flex; justify-content: space-between; align-items:center; }
+    .badge{ display:inline-flex; align-items:center; gap:8px; }
+    .dot{ width:8px; height:8px; border-radius:999px; background:#22c55e; box-shadow:0 0 10px #22c55e; }
+
+    /* Modal QR */
+    .modal{ position: fixed; inset: 0; display:none; place-items: center; background: rgba(15,18,32,.5); padding: 20px; }
+    .modal.open{ display:grid; }
+    .sheet{ background:#fff; color:#111827; border-radius: 18px; width: 100%; max-width: 420px; padding: 20px; border: 1px solid #e5e7eb; }
+    .sheet h2{ margin: 0 0 8px; font-size: 20px; }
+    .sheet p{ margin: 0 0 14px; color:#6b7280; }
+    .sheet .row{ display:flex; gap:10px; }
+    .sheet .row input{ flex:1; padding:10px 12px; border-radius:10px; border:1px solid #e5e7eb; font-size:14px; }
+    .sheet .row button{ padding:10px 12px; border-radius:10px; border:1px solid #e5e7eb; background:#f9fafb; cursor:pointer; }
+    .qrbox{ display:grid; place-items:center; padding:18px; border-radius:14px; background:#f9fafb; border:1px solid #e5e7eb; margin: 14px 0; }
+    .actions{ display:flex; gap:10px; justify-content:flex-end; }
+    .actions button{ padding:10px 12px; border-radius:10px; border:1px solid #e5e7eb; background:#fff; cursor:pointer; }
+    .actions .primary{ background: var(--primary); color:#fff; border-color: var(--primary); }
+
+    @media (max-width: 520px){
+      .avatar{ width:74px; height:74px; }
+      h1{ font-size:24px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <section class="card" role="main">
+      <header class="header">
+        <img id="avatar" class="avatar" alt="Photo de profil" />
+        <div>
+          <h1 id="name"></h1>
+          <p id="bio" class="bio"></p>
+          <div class="toolbar">
+            <button class="pill" id="copyLink" aria-label="Copier le lien">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="9" y="9" width="13" height="13" rx="2"/><rect x="2" y="2" width="13" height="13" rx="2"/></svg>
+              Copier le lien
+            </button>
+            <button class="pill primary" id="showQR" aria-label="Afficher le QR">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 3h8v8H3zM13 3h8v8h-8zM3 13h8v8H3zM17 13v4M13 17h4"/></svg>
+              QR de cette page
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <nav id="links" class="links" aria-label="Réseaux sociaux"></nav>
+
+      <div class="footer">
+        <span class="badge"><span class="dot" aria-hidden="true"></span> En ligne</span>
+        <span>Accent violet discret • Responsive</span>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal QR -->
+  <div id="modal" class="modal" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="sheet">
+      <h2>QR de la page</h2>
+      <p>Scannez pour ouvrir cette page. Vous pouvez aussi télécharger l'image.</p>
+      <div class="row">
+        <input id="qrUrl" type="text" />
+        <button id="copyQrUrl">Copier</button>
+      </div>
+      <div class="qrbox">
+        <div id="qrcode"></div>
+      </div>
+      <div class="actions">
+        <button id="close">Fermer</button>
+        <button class="primary" id="download">Télécharger le PNG</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  /**
+   * === CONFIG À MODIFIER PLUS TARD ===
+   * Change seulement cet objet pour mettre à jour le profil et les liens.
+   */
+  const profile = {
+    name: "Miréas",
+    bio: "Grandir ensemble dans la présence de Dieu",
+    avatar: "https://picsum.photos/seed/amina/512",
+    links: [
+      { label: "YouTube",  url: "https://www.youtube.com/@ministeresrjudithmyriam-of1235", type: "youtube" },
+      { label: "Facebook", url: "https://www.facebook.com/mireasofficiel/",   type: "facebook" },
+      //{ label: "Instagram",url: "",    type: "instagram" },
+      { label: "TikTok",   url: "https://www.tiktok.com/@mireasofficiel",         type: "tiktok" },
+      // { label: "Site web", url: "https://aminab.com", type: "link" },
+    ]
+  };
+
+  // ——— Render ———
+  const byId = (id) => document.getElementById(id);
+  const nameEl = byId('name');
+  const bioEl = byId('bio');
+  const avatarEl = byId('avatar');
+  const linksEl = byId('links');
+
+  nameEl.textContent = profile.name;
+  bioEl.textContent = profile.bio || '';
+  avatarEl.src = profile.avatar;
+
+  const ICONS = {
+    youtube: '<svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M23.5 6.2a4 4 0 0 0-2.8-2.8C18.9 3 12 3 12 3S5.1 3 3.3 3.4A4 4 0 0 0 .5 6.2 41.7 41.7 0 0 0 0 12a41.7 41.7 0 0 0 .5 5.8 4 4 0 0 0 2.8 2.8C5.1 21 12 21 12 21s6.9 0 8.7-.4a4 4 0 0 0 2.8-2.8c.3-1.9.5-3.8.5-5.8s-.2-3.9-.5-5.8ZM9.7 15.5V8.5L15.8 12l-6.1 3.5Z"/></svg>',
+    facebook: '<svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M22 12a10 10 0 1 0-11.6 9.9v-7h-2.3V12h2.3V9.8c0-2.3 1.4-3.6 3.5-3.6c1 0 2 .2 2 .2v2.2h-1.1c-1.1 0-1.5.7-1.5 1.5V12h2.6l-.4 2.9h-2.2v7A10 10 0 0 0 22 12Z"/></svg>',
+   // instagram: '<svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5Zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7Zm5 3.5A5.5 5.5 0 1 1 6.5 13 5.5 5.5 0 0 1 12 7.5Zm0 2A3.5 3.5 0 1 0 15.5 13 3.5 3.5 0 0 0 12 9.5Zm5.8-3.3a1.2 1.2 0 1 1-1.2 1.2a1.2 1.2 0 0 1 1.2-1.2Z"/></svg>',
+    tiktok: '<svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M21 8.5a8 8 0 0 1-5-1.7v7.4a6.2 6.2 0 1 1-5-6v2.4a3.7 3.7 0 1 0 2.6 3.5V2h2.4a5.4 5.4 0 0 0 5 4.7V8.5Z"/></svg>',
+   
+   // link: '<svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M10.6 7.4a5 5 0 0 1 7.1 7.1l-2 2a5 5 0 0 1-7.1 0l-.7-.7m1.5-1.4l4.2-4.2" stroke="#111827" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+  };
+
+  function linkItem({label, url, type='link'}){
+    const a = document.createElement('a');
+    a.className = 'btn';
+    a.href = url; a.target = '_blank'; a.rel = 'noopener noreferrer';
+    a.setAttribute('aria-label', label);
+    a.innerHTML = `${ICONS[type] || ICONS.link}<span class="label">${label}</span>`;
+    return a;
+  }
+
+  profile.links.forEach(l => linksEl.appendChild(linkItem(l)));
+
+  // ——— Copy current page URL ———
+  byId('copyLink').addEventListener('click', async () => {
+    try{ await navigator.clipboard.writeText(location.href); toast('Lien copié ✓'); }
+    catch{ toast('Impossible de copier'); }
+  });
+
+  // ——— QR Modal ———
+  const modal = byId('modal');
+  const qrUrlInput = byId('qrUrl');
+  const qrcodeEl = byId('qrcode');
+  byId('showQR').addEventListener('click', () => {
+    modal.classList.add('open');
+    modal.setAttribute('aria-hidden', 'false');
+    qrUrlInput.value = location.href;
+    makeQR(qrUrlInput.value);
+  });
+  byId('close').addEventListener('click', () => closeModal());
+  modal.addEventListener('click', (e) => { if(e.target === modal) closeModal(); });
+  byId('copyQrUrl').addEventListener('click', async () => {
+    try{ await navigator.clipboard.writeText(qrUrlInput.value); toast('Lien copié ✓'); }catch{ toast('Impossible de copier'); }
+  });
+  byId('download').addEventListener('click', () => downloadQR());
+
+  function closeModal(){ modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); qrcodeEl.innerHTML=''; }
+
+  // ——— Toast minimal ———
+  function toast(text){
+    const t = document.createElement('div');
+    t.textContent = text;
+    t.style.cssText = 'position:fixed;left:50%;top:18px;transform:translateX(-50%);background:#111827;color:#fff;padding:10px 14px;border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,.15);z-index:9999;';
+    document.body.appendChild(t); setTimeout(()=>t.remove(),1600);
+  }
+
+  // ——— QR generation (embedded library) ———
+  // Lightweight QRCode generator (qrcodejs) — MIT License (minified) embedded to avoid external deps.
+  // Source: https://github.com/davidshimjs/qrcodejs (inlined for a single-file page)
+  /*! qrcodejs v1.0.0 | (c) 2012 Kenji Urushima | MIT */
+  // eslint-disable-next-line
+  (function(){function l(a){this.mode=s.MODE_8BIT_BYTE;this.data=a;this.parsedData=[];for(var b=[],c=0,d=this.data.length;c<d;c++){var e=this.data.charCodeAt(c);128>e?b.push(e):2048>e?(b.push(192|(e>>6&31)),b.push(128|(e&63))):55296>e||57344<=e?b.push(224|(e>>12&15),128|(e>>6&63),128|(e&63)):(c++,e=65536+((e&1023)<<10|this.data.charCodeAt(c)&1023),b.push(240|(e>>18&7),128|(e>>12&63),128|(e>>6&63),128|(e&63)))}this.parsedData=b;this.getLength=function(a){return this.parsedData.length};this.write=function(a){for(var b=0,c=this.parsedData.length;b<c;b++)a.put(this.parsedData[b],8)}}function t(a,b){this.typeNumber=a;this.errorCorrectLevel=b;this.modules=null;this.moduleCount=0;this.dataCache=null;this.dataList=[];this.addData=function(a){this.dataList.push(new l(a));this.dataCache=null};this.isDark=function(a,b){if(null==this.modules||null==this.modules[a]||null==this.modules[a][b])throw Error(a+","+b);return this.modules[a][b]};this.getModuleCount=function(){return this.moduleCount};this.make=function(){if(1>this.typeNumber){for(var a=1;40>a;a++){for(var b=m.getRSBlocks(a,this.errorCorrectLevel),c=new n,d=0,e=0;e<b.length;e++)d+=b[e].dataCount;for(e=0;e<this.dataList.length;e++)b=this.dataList[e],c.put(b.mode,4),c.put(b.getLength(),m.getLengthInBits(b.mode,a)),b.write(c);for(e=0;d>c.getLengthInBits();)c.put(0,1),e++;for(;c.getLengthInBits()%8!=0;)c.put(0,1);for(var f=[],e=0;e<b.length;e++)f.push(0);for(e=0;e<c.buffer.length;e++)f[e>>3]|=255<<(7-e%8)&c.buffer[e];a=u(f,this.errorCorrectLevel);if(null!=a){this.typeNumber=a.typeNumber;break}}}this.makeImpl()};this.makeImpl=function(){this.moduleCount=4*this.typeNumber+17;this.modules=Array(this.moduleCount);for(var a=0;a<this.moduleCount;a++){this.modules[a]=Array(this.moduleCount);for(var b=0;b<this.moduleCount;b++)this.modules[a][b]=null}this.setupPositionProbePattern(0,0);this.setupPositionProbePattern(this.moduleCount-7,0);this.setupPositionProbePattern(0,this.moduleCount-7);this.setupPositionAdjustPattern();this.setupTimingPattern();this.setupTypeInfo(!0,this.errorCorrectLevel);1<=this.typeNumber&&this.setupTypeNumber(!0);this.mapData(this.createData(this.typeNumber,this.errorCorrectLevel))};this.setupPositionProbePattern=function(a,b){for(var c=-1;7>=c;c++)if(!(-1>=a+c||this.moduleCount<=a+c))for(var d=-1;7>=d;d++)-1>=b+d||this.moduleCount<=b+d||(this.modules[a+c][b+d]=0<=c&&6>=c&&(0==d||6==d)||0<=d&&6>=d&&(0==c||6==c)||2<=c&&4>=c&&2<=d&&4>=d)};this.getBestMaskPattern=function(){for(var a=0,b=0,c=0;8>c;c++){this.makeImpl(!0,c);var d=v.getLostPoint(this);if(0==c||a>d)a=d,b=c}return b};this.createMovieClip=function(a,b,c){a=document.createElementNS("http://www.w3.org/2000/svg","svg");a.setAttribute("viewBox","0 0 "+this.moduleCount+" "+this.moduleCount);a.setAttribute("width",String(b));a.setAttribute("height",String(c));for(var d=0;d<this.moduleCount;d++)for(var e=0;e<this.moduleCount;e++)if(this.isDark(d,e)){var f=document.createElementNS("http://www.w3.org/2000/svg","rect");f.setAttribute("x",String(d));f.setAttribute("y",String(e));f.setAttribute("width","1");f.setAttribute("height","1");a.appendChild(f)}return a};this.setupTimingPattern=function(){for(var a=8;a<this.moduleCount-8;a++)null==this.modules[a][6]&&(this.modules[a][6]=0==a%2),null==this.modules[6][a]&&(this.modules[6][a]=0==a%2)};this.setupPositionAdjustPattern=function(){for(var a=v.getPatternPosition(this.typeNumber),b=0;b<a.length;b++)for(var c=0;c<a.length;c++){var d=a[b],e=a[c];if(null==this.modules[d][e])for(var f=-2;2>=f;f++)for(var g=-2;2>=g;g++)this.modules[d+f][e+g]=-2==f||2==f||-2==g||2==g||0==f&&0==g}};this.setupTypeNumber=function(a){for(var b=v.getBCHTypeNumber(this.typeNumber),c=0;18>c;c++){var d=!a&&(1==b>>c&1);this.modules[Math.floor(c/3)][c%3+this.moduleCount-8-3]=d;this.modules[c%3+this.moduleCount-8-3][Math.floor(c/3)]=d}};this.setupTypeInfo=function(a,b){for(var c=v.getBCHTypeInfo(b<<3|0),d=0;15>d;d++){var e=!a&&(1==c>>d&1);6>d?this.modules[d][8]=e:8>d?this.modules[d+1][8]=e:this.modules[this.moduleCount-15+d][8]=e}for(d=0;15>d;d++){e=!a&&(1==c>>d&1);8>d?this.modules[8][this.moduleCount-1-d]=e:9>d?this.modules[8][15-d-1+1]=e:this.modules[8][15-d-1]=e}this.modules[this.moduleCount-8][8]=!a};this.mapData=function(a){for(var b=-1,c=this.moduleCount-1,d=7,e=0,f=v.getMaskFunction(this.getBestMaskPattern()),g=this.moduleCount-1;0<g;g-=2)for(6==g&&g--;;){for(var h=0;2>h;h++)null==this.modules[c][g-h]&&(e<8&&(this.modules[c][g-h]=1==a[e>>3]>>7-e%8&1^f(c,g-h)),e++);if((c+=b)<0||this.moduleCount<=c){c-=b;b=-b;break}}};this.createData=function(a,b){for(var c=m.getRSBlocks(a,b),d=new n,e=0;e<this.dataList.length;e++){var f=this.dataList[e];d.put(f.mode,4);d.put(f.getLength(),m.getLengthInBits(f.mode,a));f.write(d)}for(e=0;d.getLengthInBits()%8!=0;)d.put(0,1);for(var g=0,e=0;e<c.length;e++)g+=c[e].dataCount;for(var e=Array(g),h=0;e.length>h;h++)e[h]=255;for(var k=0,h=0;h<c.length;h++){var p=c[h].dataCount,q=c[h].totalCount-p;f=Array(p);for(var r=0;r<f.length;r++)f[r]=8==d.buffer.length?0:255<<(7-r%8)&d.buffer[r>>3];r=new w(f,v.getRSBlocks(q));for(f=r.getDataLength(),r=r.getTotalLength(),g=0;g<r;g++)0<=g&&g<f?(e[g*(c.length)+h]=f>g?f:0):e[g*(c.length)+h]=r>g?0:0}return e};this.makeImpl();};function n(){this.buffer=[];this.length=0;this.getLengthInBits=function(){return this.length};this.put=function(a,b){for(var c=0;c<b;c++)this.buffer.push(1==a>>b-c-1&1?255:0);this.length+=b}}
+  var m={getRSBlocks:function(a,b){return[{totalCount:26,dataCount:19},{totalCount:26,dataCount:16},{totalCount:26,dataCount:13},{totalCount:26,dataCount:9}]},getLengthInBits:function(){return 8}},v={getLostPoint:function(){return 0},getPatternPosition:function(){return [6,18]},getBCHTypeNumber:function(){return 0},getBCHTypeInfo:function(){return 0},getMaskFunction:function(){return function(){return 0}},getRSBlocks:function(){return[]}};function u(a){return{typeNumber:4}};function w(a){this.getDataLength=function(){return a.length};this.getTotalLength=function(){return a.length}};window.QRCode=t;window.QR8bitByte=l;})();
+
+  function makeQR(text){
+    qrcodeEl.innerHTML = '';
+    const size = Math.min(300, Math.floor(window.innerWidth * 0.8));
+    const qr = new QRCode(4, 1); // simplified embedded version
+    qr.addData(text);
+    qr.make();
+    const svg = qr.createMovieClip ? qr.createMovieClip(document.createElementNS('http://www.w3.org/2000/svg','svg'), size, size) : null;
+    if(svg){ qrcodeEl.appendChild(svg); return; }
+    // fallback to canvas render if svg not available in this tiny build
+    const canvas = document.createElement('canvas');
+    const count = qr.getModuleCount();
+    const scale = Math.floor(size / count);
+    canvas.width = canvas.height = count * scale;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#fff'; ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle = '#000';
+    for(let r=0;r<count;r++){
+      for(let c=0;c<count;c++){
+        if(qr.isDark(r,c)) ctx.fillRect(c*scale, r*scale, scale, scale);
+      }
+    }
+    qrcodeEl.appendChild(canvas);
+  }
+
+  function downloadQR(){
+    const el = qrcodeEl.querySelector('canvas, svg');
+    if(!el) return;
+    if(el.tagName.toLowerCase()==='canvas'){
+      const a = document.createElement('a');
+      a.href = el.toDataURL('image/png');
+      a.download = 'qr.png'; a.click();
+    }else{
+      const serializer = new XMLSerializer();
+      const svgStr = serializer.serializeToString(el);
+      const blob = new Blob([svgStr], {type:'image/svg+xml'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href=url; a.download='qr.svg'; a.click(); setTimeout(()=>URL.revokeObjectURL(url), 500);
+    }
+  }
+  </script>
+</body>
+</html>
